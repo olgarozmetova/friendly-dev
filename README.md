@@ -1,22 +1,22 @@
-# Welcome to React Router!
+# The Friendly Dev
 
-A modern, production-ready template for building full-stack React applications using React Router.
+Personal website and portfolio built with React Router 8 in framework mode, with server-side rendering, TypeScript and Tailwind CSS.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+## Stack
 
-## Features
+- **React Router 8** (framework mode) with SSR and layout routes
+- **React 19**
+- **TypeScript**, with `~/` aliased to `app/`
+- **Tailwind CSS 4** via the Vite plugin, dark theme by default
+- **Vite 8** as bundler and dev server
+- **react-icons** for icons
+- **json-server** to mock a REST API from `data/db.json` during development
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+## Requirements
 
-## Getting Started
+- Node.js 22.12 or newer
 
-### Installation
+## Getting started
 
 Install the dependencies:
 
@@ -24,64 +24,63 @@ Install the dependencies:
 npm install
 ```
 
-### Development
+This project needs **two processes running in parallel** during development. In one terminal, start the mock API:
 
-Start the development server with HMR:
+```bash
+npm run json-server
+```
+
+It serves on `http://localhost:8000`, with the projects available at `http://localhost:8000/projects`.
+
+In another terminal, start the app with hot module replacement:
 
 ```bash
 npm run dev
 ```
 
-Your application will be available at `http://localhost:5173`.
+It serves on `http://localhost:5173`.
 
-## Building for Production
+> Without `json-server` running, the projects page fails to load, since its `loader` fetches the data from that API.
 
-Create a production build:
+## Scripts
 
-```bash
-npm run build
+- `npm run dev` — dev server with HMR
+- `npm run json-server` — mock REST API on port 8000
+- `npm run build` — production build
+- `npm start` — serve the production build
+- `npm run typecheck` — generate route types and run the TypeScript check
+
+## Pages
+
+The site has five pages: the home page with the hero and its call-to-action links, an about page, a projects page showing a grid of cards loaded from the API, plus a blog and a contact page that are still placeholders.
+
+Routes are grouped into two layouts. The home layout renders the hero above the page content, while every other page shares only the centered container.
+
+## Data
+
+Projects live in `data/db.json` and are fetched in the route `loader`, which means on the server:
+
+```ts
+export async function loader(): Promise<{ projects: Project[] }> {
+  const res = await fetch('http://localhost:8000/projects')
+  const data = await res.json()
+  return { projects: data }
+}
 ```
 
-## Deployment
-
-### Docker Deployment
-
-To build and run using Docker:
-
-```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
+Each project follows the `Project` type defined in `app/types.ts`, with a title, description, image, URL, date, category and a featured flag.
 
 ## Styling
 
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+Tailwind CSS 4 is configured directly in `app/app.css`, with no `tailwind.config.js` file. The dark theme is always on through a `dark` class on the `<html>` element, and the `dark:` variant uses the class strategy instead of the system preference, so adding a light/dark toggle later only means toggling that class.
 
----
+## Deployment
 
-Built with ❤️ using React Router.
+The project ships with a ready-to-use `Dockerfile`:
+
+```bash
+docker build -t friendly-dev .
+docker run -p 3000:3000 friendly-dev
+```
+
+You can also deploy the output of `npm run build` to any platform that runs Node.
